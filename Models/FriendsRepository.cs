@@ -5,7 +5,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
-using System.Web.Mvc;
 using Dapper;
 
 
@@ -13,48 +12,70 @@ namespace DapperBasicCrud.Models
 {
     public class FriendsRepository
     {
+        
         private string connectionstring;
 
         public FriendsRepository()
         {
-            connectionstring = System.Configuration.ConfigurationManager.ConnectionStrings["connectionstring"].ConnectionString;
+            connectionstring = System.Configuration.
+                ConfigurationManager.ConnectionStrings["connectionstring"].ConnectionString;
             
-        }
-      
-
-        public List<Friend> GetAll()
+        }       
+        
+        public List<Friend> GetAll(RequestModel request)
         {
             using(IDbConnection db = new SqlConnection(connectionstring))
             {                             
-                return db.Query<Friend>("sp_Friends_GetAll",commandType: CommandType.StoredProcedure).ToList();
+                return db
+                    .Query<Friend>("usp_Friends_GetAll",
+                    request,
+                    commandType: CommandType.StoredProcedure)
+                    .ToList();
             }
         }
         public Friend Get(int Id)
         {
             using (IDbConnection db = new SqlConnection(connectionstring))
             {
-                return db.Query<Friend>("sp_Friends_Get",new { Id }, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                return db
+                    .Query<Friend>("usp_Friends_Get",
+                    new { Id }, 
+                    commandType: CommandType.StoredProcedure)
+                    .FirstOrDefault();
             }
         }
-        public Friend Create(Friend friend)
+        public int Create(Friend friend)
         {
             using (IDbConnection db = new SqlConnection(connectionstring))
             {
-                return db.Query<Friend>("sp_Friends_Create", friend, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                int lastInsertedId=
+                 db.Query<int>("usp_Friends_Create", friend, 
+                    commandType: CommandType.StoredProcedure)               
+                    .FirstOrDefault();
+
+                return lastInsertedId;
+                
             }
         }
-        public Friend Update(Friend friend)
+        public int Update(Friend friend)
         {
             using (IDbConnection db = new SqlConnection(connectionstring))
             {
-                return db.Query<Friend>("sp_Friends_Update", friend, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                return db
+                    .Execute("usp_Friends_Update",
+                       friend,
+                       commandType: CommandType.StoredProcedure);
             }
         }
-        public Friend Delete(int Id)
+        public int Delete(int Id)
         {
             using (IDbConnection db = new SqlConnection(connectionstring))
             {
-                return db.Query<Friend>("sp_Friends_Delete", new { Id }, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                return db
+                    .Execute(
+                        "usp_Friends_Delete",
+                        new { Id },
+                        commandType: CommandType.StoredProcedure);
             }
         }
 

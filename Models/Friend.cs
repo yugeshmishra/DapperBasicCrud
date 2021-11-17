@@ -16,6 +16,7 @@ namespace DapperBasicCrud.Models
         public string City { get; set; }
         [Required]
 
+        [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
 
     }
