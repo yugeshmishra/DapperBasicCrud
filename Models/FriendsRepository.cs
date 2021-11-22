@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using Dapper;
 
 
@@ -14,6 +15,8 @@ namespace DapperBasicCrud.Models
     {
         
         private string connectionstring;
+        public SelectList City { get; set; }
+        // private object con;
 
         public FriendsRepository()
         {
@@ -24,6 +27,7 @@ namespace DapperBasicCrud.Models
         
         public List<Friend> GetAll(RequestModel request)
         {
+           
             using(IDbConnection db = new SqlConnection(connectionstring))
             {                             
                 return db
@@ -33,6 +37,24 @@ namespace DapperBasicCrud.Models
                     .ToList();
             }
         }
+
+        public List<Friend> SearchSortPage(int TotalRecords,int PageSize, int Page, string OrderBy, string OrderDir, string Search)
+        {
+            using (IDbConnection db = new SqlConnection(connectionstring))
+            {
+                DynamicParameters param = new DynamicParameters();
+                param.Add("PageSize", PageSize);
+                param.Add("PageNumber", Page);
+                param.Add("SortBy", OrderBy);
+                param.Add("SortOrder", OrderDir);
+                param.Add("Search", Search);
+                         
+               return db.Query<Friend>( "usp_Friends_GetPaged", param, commandType: CommandType.StoredProcedure).ToList();
+                        
+            }
+                
+        }     
+
         public Friend Get(int Id)
         {
             using (IDbConnection db = new SqlConnection(connectionstring))
@@ -79,5 +101,6 @@ namespace DapperBasicCrud.Models
             }
         }
 
+      
     }
 }

@@ -1,28 +1,59 @@
-﻿@model IEnumerable<DapperBasicCrud.Models.Friend>
-
-@{
-    ViewBag.Title = "Index";
-}
+﻿@model IPagedList<DapperBasicCrud.Models.Friend>
 
 <h2>Friends</h2>
 
+@{
+    ViewBag.Title = "Index";
 
+}
+@using PagedList.Mvc;
+@using PagedList;
 
 <div class="row pb-3">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <form method="get" action="@Url.Action("Index")">
             <input name="Search" type="search" placeholder="Search" value="@ViewBag.Request.Search" />
             <button class="btn btn-primary">Search</button>
         </form>
     </div>
+
+   
+
     <div class="col-md-6 text-end">
         @Html.ActionLink("Create New", "Create", null,
         new { @class = "btn btn-primary" })
-        <button class="btn btn-primary">Print</button>
-        <button class="btn btn-primary">Export to Excel</button>
+
+       <a href="@Url.Action("Index")"><button class="btn btn-primary">Refresh</button></a>
+        <button class="btn btn-primary" onclick="PrintOnlyTable()">Print</button>
+        <button class="btn btn-primary" type="submit" value="openFullscreen()" onclick="openFullscreen()">FullScreen</button>
+        <a   style="float:left;" href="@Url.Action("ExportToExcel","Friend")">ExportToExcel</a>
     </div>
 </div>
 
+<script>
+    function PrintOnlyTable() {
+        var HTML = $("html");
+        var cln = document.documentElement.innerHTML;
+        HTML.html($("table"));
+        window.print();
+        document.documentElement.innerHTML = cln;
+        return false;
+    }
+</script>
+
+<script>
+
+    var elem = document.documentElement;
+    function openFullscreen() {
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+</script>
 
 <table class="table">
     <tr>
@@ -51,8 +82,8 @@
         <th></th>
     </tr>
 
- @foreach (var item in Model)
-  {
+    @foreach (var item in Model)
+    {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -69,20 +100,12 @@
                 @Html.ActionLink("Delete", "Delete", new { id = item.Id })
             </td>
         </tr>
-  }
+    }
 
-    </table>
-<div class="row">
-    <div class="col-md-9">
-        <a href="">&laquo; First</a>
-        <a href="">&lt; Previous</a>
-        Showing 1 out of 5 pages
-        <a href="">&gt; Next</a>
-        <a href="">&raquo; Last</a>
+</table>
 
-        [Total 5000 records]
-    </div>
-    <div class="col text-end">
-        Page Size: 20 30 50 All
-    </div>
-</div>
+    @Html.PagedListPager(Model, i => Url.Action("Index", "Friend", new { i, search = Request.QueryString["search"] }),
+       new PagedListRenderOptions() { Display = PagedListDisplayMode.IfNeeded, DisplayPageCountAndCurrentLocation = true, DisplayItemSliceAndTotal = true })
+
+
+
